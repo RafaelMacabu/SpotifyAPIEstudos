@@ -19,6 +19,15 @@ public class SpecBuilder {
 
     }
 
+    public static RequestSpecification getAccountReqSpec(){
+        return new RequestSpecBuilder().
+                setBaseUri("https://accounts.spotify.com").
+                setContentType(ContentType.URLENC).
+                log(LogDetail.ALL).
+                build();
+
+    }
+
     public static ResponseSpecification getResSpec(){
 
         return new ResponseSpecBuilder().

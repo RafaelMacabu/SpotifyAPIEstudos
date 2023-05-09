@@ -1,10 +1,12 @@
 package com.spotify.oauth2.api;
 
 import com.spotify.oauth2.pojo.Playlist;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
-import static com.spotify.oauth2.api.SpecBuilder.getReqSpec;
-import static com.spotify.oauth2.api.SpecBuilder.getResSpec;
+import java.util.HashMap;
+
+import static com.spotify.oauth2.api.SpecBuilder.*;
 import static io.restassured.RestAssured.given;
 
 public class RestResource {
@@ -37,6 +39,15 @@ public class RestResource {
                 when().
                 put(path).
                 then().
+                extract().response();
+    }
+
+    public static Response postAccount(HashMap<String,String> formParams){
+        return given(getAccountReqSpec()).
+                formParams(formParams).
+                when().
+                post("/api/token").
+                then().spec(SpecBuilder.getResSpec()).
                 extract().response();
     }
 }
