@@ -4,6 +4,7 @@ package com.spotify.oauth2.tests;
 import com.spotify.oauth2.api.applicationAPI.PlaylistApi;
 import com.spotify.oauth2.pojo.ErrorRoot;
 import com.spotify.oauth2.pojo.Playlist;
+import com.spotify.oauth2.utils.DataLoader;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.LogDetail;
@@ -47,7 +48,7 @@ public class PlaylistsTest {
         requestPlaylist.setName("Playlist API 2");
         requestPlaylist.setDescription("Descrição API 2");
 
-        Response response = PlaylistApi.get("27L5BsZ3akYGPINyxe4zTJ");
+        Response response = PlaylistApi.get(DataLoader.getInstance().getPlaylistId());
         assertThat(response.statusCode(),equalTo(200));
 
         Playlist responsePlaylist = response.as(Playlist.class);
@@ -65,7 +66,7 @@ public class PlaylistsTest {
         requestPlaylist.setDescription("Descrição API 2");
         requestPlaylist.setPublic(true);
 
-        Response response = PlaylistApi.update(requestPlaylist,"27L5BsZ3akYGPINyxe4zTJ");
+        Response response = PlaylistApi.update(requestPlaylist, DataLoader.getInstance().getUpdatePlaylistId());
         assertThat(response.statusCode(),equalTo(200));
 
     }
