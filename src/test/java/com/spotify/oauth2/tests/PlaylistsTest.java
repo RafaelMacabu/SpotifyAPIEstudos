@@ -24,86 +24,91 @@ import static org.hamcrest.Matchers.equalTo;
 public class PlaylistsTest {
 
     @Test
-    public void create_playlist(){
-        Playlist requestPlaylist = new Playlist()
-                .setName("New Playlist")
-                .setDescription("New Playlist Description")
-                .setPublic(false);
+    public void create_playlist() {
+        Playlist requestPlaylist = playlistBuilder("New Playlist", "New Playlist Description", false);
 
         Response response = PlaylistApi.post(requestPlaylist);
-        assertThat(response.statusCode(),equalTo(201));
+        assertStatusCode(response.statusCode(), 201);
 
         Playlist responsePlaylist = response.as(Playlist.class);
+        assertPlaylistEqual(responsePlaylist, requestPlaylist);
 
-        assertThat(responsePlaylist.getName(),equalTo(requestPlaylist.getName()));
-        assertThat(responsePlaylist.getDescription(),equalTo(requestPlaylist.getDescription()));
-        assertThat(responsePlaylist.getPublic(),equalTo(requestPlaylist.getPublic()));
+
     }
 
 
     @Test
-    public void get_playlist(){
-
-        Playlist requestPlaylist = new Playlist();
-        requestPlaylist.setName("Playlist API 2");
-        requestPlaylist.setDescription("Descrição API 2");
+    public void get_playlist() {
+        Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2",true);
 
         Response response = PlaylistApi.get(DataLoader.getInstance().getPlaylistId());
-        assertThat(response.statusCode(),equalTo(200));
+        assertStatusCode(response.statusCode(), 200);
 
         Playlist responsePlaylist = response.as(Playlist.class);
+        assertPlaylistEqual(responsePlaylist, requestPlaylist);
 
-
-        assertThat(responsePlaylist.getName(),equalTo(requestPlaylist.getName()));
-        assertThat(responsePlaylist.getDescription(),equalTo(requestPlaylist.getDescription()));
     }
 
 
     @Test
-    public void update_playlist(){
-        Playlist requestPlaylist = new Playlist();
-        requestPlaylist.setName("Playlist API 2");
-        requestPlaylist.setDescription("Descrição API 2");
-        requestPlaylist.setPublic(true);
+    public void update_playlist() {
+        Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2", true);
 
         Response response = PlaylistApi.update(requestPlaylist, DataLoader.getInstance().getUpdatePlaylistId());
-        assertThat(response.statusCode(),equalTo(200));
+        assertStatusCode(response.statusCode(), 200);
 
     }
 
     @Test
-    public void should_not_be_able_create_playlist_without_name(){
-        Playlist requestPlaylist = new Playlist();
-        requestPlaylist.setName("");
-        requestPlaylist.setDescription("Descrição API 222");
-        requestPlaylist.setPublic(true);
+    public void should_not_be_able_create_playlist_without_name() {
+        Playlist requestPlaylist = playlistBuilder("", "Descrição API 222", true);
 
         Response response = PlaylistApi.post(requestPlaylist);
-        assertThat(response.statusCode(),equalTo(400));
+        assertStatusCode(response.statusCode(), 400);
 
         ErrorRoot error = response.as(ErrorRoot.class);
 
+        assertError(error, 400, "Missing required field: name");
 
-        assertThat(error.getError().getStatus(),equalTo(400));
-        assertThat(error.getError().getMessage(),equalTo("Missing required field: name"));
 
     }
 
     @Test
-    public void should_not_be_able_create_playlist_with_expired_token(){
-        Playlist requestPlaylist = new Playlist();
-        requestPlaylist.setName("Playlist API 2");
-        requestPlaylist.setDescription("Descrição API 2");
-        requestPlaylist.setPublic(true);
+    public void should_not_be_able_create_playlist_with_expired_token() {
+        Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2", true);
 
-        Response response = PlaylistApi.post(requestPlaylist,"12345");
-        assertThat(response.statusCode(),equalTo(401));
+        Response response = PlaylistApi.post(requestPlaylist, "12345");
+        assertStatusCode(response.statusCode(), 401);
 
         ErrorRoot error = response.as(ErrorRoot.class);
 
+        assertError(error, 401, "Invalid access token");
 
 
-        assertThat(error.getError().getStatus(),equalTo(401));
-        assertThat(error.getError().getMessage(),equalTo("Invalid access token"));
+    }
+
+    public Playlist playlistBuilder(String name, String description, boolean _public) {
+        return new Playlist()
+                .setName(name)
+                .setDescription(description)
+                .setPublic(_public);
+
+    }
+
+    public void assertPlaylistEqual(Playlist responsePlaylist, Playlist requestPlaylist) {
+        assertThat(responsePlaylist.getName(), equalTo(requestPlaylist.getName()));
+        assertThat(responsePlaylist.getDescription(), equalTo(requestPlaylist.getDescription()));
+        assertThat(responsePlaylist.getPublic(), equalTo(requestPlaylist.getPublic()));
+
+    }
+
+    public void assertStatusCode(int actualStatusCode, int expectedStatusCode) {
+        assertThat(actualStatusCode, equalTo(expectedStatusCode));
+
+    }
+
+    public void assertError(ErrorRoot responseError, int expectedStatusCode, String expectedMessage) {
+        assertThat(responseError.getError().getStatus(), equalTo(expectedStatusCode));
+        assertThat(responseError.getError().getMessage(), equalTo(expectedMessage));
     }
 }
