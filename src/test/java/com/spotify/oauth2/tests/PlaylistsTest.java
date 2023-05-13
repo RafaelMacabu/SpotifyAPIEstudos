@@ -5,6 +5,7 @@ import com.spotify.oauth2.api.applicationAPI.PlaylistApi;
 import com.spotify.oauth2.pojo.ErrorRoot;
 import com.spotify.oauth2.pojo.Playlist;
 import com.spotify.oauth2.utils.DataLoader;
+import io.qameta.allure.*;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.LogDetail;
@@ -20,10 +21,13 @@ import static com.spotify.oauth2.api.SpecBuilder.getResSpec;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-
+@Epic("Spotify OAuth 2.0")
+@Feature("Playlist API")
 public class PlaylistsTest {
 
-    @Test
+    @Story("Create Playlist")
+    @Description("description 123")
+    @Test(description = "creates a playlist")
     public void create_playlist() {
         Playlist requestPlaylist = playlistBuilder("New Playlist", "New Playlist Description", false);
 
@@ -58,7 +62,7 @@ public class PlaylistsTest {
         assertStatusCode(response.statusCode(), 200);
 
     }
-
+    @Story("Create Playlist")
     @Test
     public void should_not_be_able_create_playlist_without_name() {
         Playlist requestPlaylist = playlistBuilder("", "Descrição API 222", true);
@@ -72,7 +76,7 @@ public class PlaylistsTest {
 
 
     }
-
+    @Story("Create Playlist")
     @Test
     public void should_not_be_able_create_playlist_with_expired_token() {
         Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2", true);
@@ -86,7 +90,7 @@ public class PlaylistsTest {
 
 
     }
-
+    @Step
     public Playlist playlistBuilder(String name, String description, boolean _public) {
         return Playlist.builder().
                 name(name).
@@ -95,14 +99,14 @@ public class PlaylistsTest {
                 build();
 
     }
-
+    @Step
     public void assertPlaylistEqual(Playlist responsePlaylist, Playlist requestPlaylist) {
         assertThat(responsePlaylist.getName(), equalTo(requestPlaylist.getName()));
         assertThat(responsePlaylist.getDescription(), equalTo(requestPlaylist.getDescription()));
         assertThat(responsePlaylist.get_public(), equalTo(requestPlaylist.get_public()));
 
     }
-
+    @Step
     public void assertStatusCode(int actualStatusCode, int expectedStatusCode) {
         assertThat(actualStatusCode, equalTo(expectedStatusCode));
 
