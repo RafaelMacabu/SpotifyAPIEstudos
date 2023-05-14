@@ -1,6 +1,7 @@
 package com.spotify.oauth2.tests;
 
 
+import com.spotify.oauth2.api.StatusCode;
 import com.spotify.oauth2.api.applicationAPI.PlaylistApi;
 import com.spotify.oauth2.pojo.ErrorRoot;
 import com.spotify.oauth2.pojo.Playlist;
@@ -18,21 +19,23 @@ import org.testng.annotations.Test;
 
 import static com.spotify.oauth2.api.SpecBuilder.getReqSpec;
 import static com.spotify.oauth2.api.SpecBuilder.getResSpec;
+import static com.spotify.oauth2.utils.FakerUtils.generateDescription;
+import static com.spotify.oauth2.utils.FakerUtils.generatePlaylistName;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 @Epic("Spotify OAuth 2.0")
 @Feature("Playlist API")
-public class PlaylistsTest {
+public class PlaylistsTest extends BaseTest {
 
     @Story("Create Playlist")
     @Description("description 123")
     @Test(description = "creates a playlist")
     public void create_playlist() {
-        Playlist requestPlaylist = playlistBuilder("New Playlist", "New Playlist Description", false);
+        Playlist requestPlaylist = playlistBuilder(generatePlaylistName(), generateDescription(), false);
 
         Response response = PlaylistApi.post(requestPlaylist);
-        assertStatusCode(response.statusCode(), 201);
+        assertStatusCode(response.statusCode(), StatusCode.CODE_201);
 
         Playlist responsePlaylist = response.as(Playlist.class);
         assertPlaylistEqual(responsePlaylist, requestPlaylist);
@@ -46,7 +49,7 @@ public class PlaylistsTest {
         Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2",true);
 
         Response response = PlaylistApi.get(DataLoader.getInstance().getPlaylistId());
-        assertStatusCode(response.statusCode(), 200);
+        assertStatusCode(response.statusCode(), StatusCode.CODE_200);
 
         Playlist responsePlaylist = response.as(Playlist.class);
         assertPlaylistEqual(responsePlaylist, requestPlaylist);
@@ -59,34 +62,34 @@ public class PlaylistsTest {
         Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2", true);
 
         Response response = PlaylistApi.update(requestPlaylist, DataLoader.getInstance().getUpdatePlaylistId());
-        assertStatusCode(response.statusCode(), 200);
+        assertStatusCode(response.statusCode(), StatusCode.CODE_200);
 
     }
     @Story("Create Playlist")
     @Test
     public void should_not_be_able_create_playlist_without_name() {
-        Playlist requestPlaylist = playlistBuilder("", "Descrição API 222", true);
+        Playlist requestPlaylist = playlistBuilder("", generateDescription(), true);
 
         Response response = PlaylistApi.post(requestPlaylist);
-        assertStatusCode(response.statusCode(), 400);
+        assertStatusCode(response.statusCode(), StatusCode.CODE_400);
 
         ErrorRoot error = response.as(ErrorRoot.class);
 
-        assertError(error, 400, "Missing required field: name");
+        assertError(error, StatusCode.CODE_400,  StatusCode.CODE_400);
 
 
     }
     @Story("Create Playlist")
     @Test
     public void should_not_be_able_create_playlist_with_expired_token() {
-        Playlist requestPlaylist = playlistBuilder("Playlist API 2", "Descrição API 2", true);
+        Playlist requestPlaylist = playlistBuilder(generatePlaylistName(), generateDescription(), true);
 
         Response response = PlaylistApi.post(requestPlaylist, "12345");
-        assertStatusCode(response.statusCode(), 401);
+        assertStatusCode(response.statusCode(), StatusCode.CODE_401);
 
         ErrorRoot error = response.as(ErrorRoot.class);
 
-        assertError(error, 401, "Invalid access token");
+        assertError(error, StatusCode.CODE_401, StatusCode.CODE_401);
 
 
     }
@@ -107,13 +110,13 @@ public class PlaylistsTest {
 
     }
     @Step
-    public void assertStatusCode(int actualStatusCode, int expectedStatusCode) {
-        assertThat(actualStatusCode, equalTo(expectedStatusCode));
+    public void assertStatusCode(int actualStatusCode, StatusCode expectedStatusCode) {
+        assertThat(actualStatusCode, equalTo(expectedStatusCode.code));
 
     }
 
-    public void assertError(ErrorRoot responseError, int expectedStatusCode, String expectedMessage) {
-        assertThat(responseError.getError().getStatus(), equalTo(expectedStatusCode));
-        assertThat(responseError.getError().getMessage(), equalTo(expectedMessage));
+    public void assertError(ErrorRoot responseError, StatusCode expectedStatusCode, StatusCode expectedMessage) {
+        assertThat(responseError.getError().getStatus(), equalTo(expectedStatusCode.code));
+        assertThat(responseError.getError().getMessage(), equalTo(expectedMessage.msg));
     }
 }

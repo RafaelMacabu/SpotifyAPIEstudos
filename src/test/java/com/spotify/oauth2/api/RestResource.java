@@ -16,7 +16,7 @@ public class RestResource {
     public static Response post(String path,String token,Object requestPlaylist){
         return given(getReqSpec()).
                 body(requestPlaylist).
-                headers("Authorization","Bearer " + token).
+                auth().oauth2(token).
                 when().
                 post(path).
                 then().spec(getResSpec()).
@@ -26,7 +26,7 @@ public class RestResource {
 
     public static Response get(String path,String token){
         return given(getReqSpec()).
-                headers("Authorization","Bearer " + token).
+                auth().oauth2(token).
                 when().
                 get(path).
                 then().spec(getResSpec()).
@@ -37,7 +37,7 @@ public class RestResource {
     public static Response update(String path,String token,Object requestPlaylist){
         return given(getReqSpec()).
                 body(requestPlaylist).
-                headers("Authorization","Bearer " + token).
+                auth().oauth2(token).
                 when().
                 put(path).
                 then().

@@ -13,7 +13,7 @@ import static io.restassured.RestAssured.given;
 public class TokenManager {
     static String access_token;
     static Instant expiry_time;
-    public static String getToken(){
+    public synchronized static String getToken(){
         try{
             if (access_token == null || Instant.now().isAfter(expiry_time)){
                 Response response  = renewToken();
